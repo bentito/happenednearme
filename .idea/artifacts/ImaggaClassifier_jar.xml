@@ -1,0 +1,11 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="ImaggaClassifier:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/ImaggaClassifier_jar</output-path>
+    <root id="archive" name="ImaggaClassifier.jar">
+      <element id="module-output" name="ImaggaClassifier" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/../unirest-java/target/unirest-java-1.4.10-SNAPSHOT-jar-with-dependencies.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/libs/jackson-core-2.8.1.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/libs/jackson-databind-2.8.3.jar" path-in-jar="/" />
+    </root>
+  </artifact>
+</component>

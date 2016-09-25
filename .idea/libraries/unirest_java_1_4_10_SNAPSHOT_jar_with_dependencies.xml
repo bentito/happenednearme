@@ -1,0 +1,12 @@
+<component name="libraryTable">
+  <library name="unirest-java-1.4.10-SNAPSHOT-jar-with-dependencies">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/../unirest-java/target/unirest-java-1.4.10-SNAPSHOT-jar-with-dependencies.jar!/" />
+      <root url="jar://$PROJECT_DIR$/libs/jackson-core-2.8.1.jar!/" />
+      <root url="jar://$PROJECT_DIR$/libs/jackson-databind-2.8.3.jar!/" />
+      <root url="jar://$PROJECT_DIR$/libs/twitter4j-core-4.0.4.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
