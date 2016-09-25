@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Simple Map</title>
+    <meta name="viewport" content="initial-scale=1.0">
+    <meta charset="utf-8">
+    <style>
+      html, body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+      }
+      #map {
+        height: 80%;
+      }
+      #floating-panel {
+        position: absolute;
+        top: 10px;
+        left: 25%;
+        z-index: 5;
+        background-color: #fff;
+        padding: 5px;
+        border: 1px solid #999;
+        text-align: center;
+        font-family: 'Roboto','sans-serif';
+        line-height: 30px;
+        padding-left: 10px;
+      }
+    </style>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBFLGas8KoWELcI-UsijjlKtTkPY2Uiy9c&callback=initMap"
+    async defer></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
+    <script>
+      var URLTarget = "http://127.0.0.1:8080";
+      var marker;
+      var geocoder;
+      var map;
+      var latitude;
+      var longitude;
+      var latlng;
+      function success(position) {
+        latitude  = parseFloat(position.coords.latitude);
+        longitude = parseFloat(position.coords.longitude);
+        latlng = new google.maps.LatLng(position.coords.latitude, position.coords.longitude)
+        map.setCenter(latlng);
+        marker.setPosition(latlng);
+        map.setZoom(15);
+      }
+      function setCurrentLocation() {
+        navigator.geolocation.getCurrentPosition(success);
+      }
+      function geocodeAddress(geocoder, resultsMap) {
+        var address = $("#placename").val();
+        geocoder.geocode({'address': address}, function(results, status) {
+          if (status === 'OK') {
+            latlng = results[0].geometry.location;
+            resultsMap.setCenter(latlng);
+            marker.setPosition(latlng);
+          } else {
+            alert('Geocode was not successful for the following reason: ' + status);
+          }
+        });
+      }
+      function setCenter() {
+        geocodeAddress(geocoder, map);
+        map.setZoom(15);
+      }
+      function initMap() {
+
+        latitude = 33.777191;
+        longitude = -84.396202;
+        latlng = new google.maps.LatLng(latitude, longitude);
+        map = new google.maps.Map(document.getElementById('map'), {
+          center: latlng,
+          zoom: 8
+        });
+        geocoder = new google.maps.Geocoder();
+        marker = new google.maps.Marker({
+          map: map,
+          position: latlng,
+          draggable: true
+        });
+        setCurrentLocation();
+
+      }
+      $(document).ready(function() {
+        $("#setCurrentLocation").click(function() {
+          setCurrentLocation();
+        })
+        $("#setCenter").click(setCenter)
+        $('#placename').bind("enterKey",function(e){
+          setCenter();
+        });
+        $('#placename').keyup(function(e){
+            if(e.keyCode == 13)
+            {
+                $(this).trigger("enterKey");
+            }
+        });
+        $('#submitCoordinates').click(function () {
+          $.post(URLTarget, {
+            latitude: marker.getPosition().lat(),
+            longitude: marker.getPosition().lng()
+          })
+        })
+      })
+      setInterval(function() {
+        $.get(URLTarget + "/wordFreq.png", function(data) {
+          $("#picture").html('<img src="data:image/png;base64,' + data + '" />')
+        })
+          }, 1000)
+    </script>
+  </head>
+  <body>
+    Location:
+    <input type="text" id="placename" placeholder="Place Name">
+    <input type="submit" value="Submit" id="setCenter">
+    <br>
+    <input type="submit" id="setCurrentLocation" value="Go To Your Current Location">
+    <br>
+    <input type="submit" value="Send Marker Coordinates To Server" id="submitCoordinates">
+    <div id="map"></div>
+    <div id="picture"></div>
+  </body>
+</html>
