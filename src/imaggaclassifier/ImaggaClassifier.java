@@ -1,5 +1,12 @@
 package imaggaclassifier;
 
+import com.kennycason.kumo.CollisionMode;
+import com.kennycason.kumo.WordCloud;
+import com.kennycason.kumo.WordFrequency;
+import com.kennycason.kumo.bg.CircleBackground;
+import com.kennycason.kumo.font.scale.SqrtFontScalar;
+import com.kennycason.kumo.nlp.FrequencyAnalyzer;
+import com.kennycason.kumo.palette.ColorPalette;
 import com.mashape.unirest.http.HttpResponse;
 import com.mashape.unirest.http.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -13,27 +20,19 @@ import org.json.JSONObject;
 import org.json.JSONArray;
 import twitter4j.*;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.PrintWriter;
+import java.awt.*;
+import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
 import java.util.*;
+import java.util.List;
+
 
 /**
  * Created by btofel on 9/24/16 for HackGT
  */
 public class ImaggaClassifier {
     public static void main(String[] args) throws Exception {
-        // The factory instance is re-useable and thread safe.
-        Twitter twitter = TwitterFactory.getSingleton();
-        Query query = new Query("geocode:-22.912214,-43.230182,1km filter:twimg");
-        QueryResult result = twitter.search(query);
-        for (Status status : result.getTweets()) {
-            System.out.println("@" + status.getUser().getScreenName() + ":" + status.getText());
-        }
-
         HttpServer server = HttpServer.create(new InetSocketAddress(8080), 0);
         server.createContext("/requests", new MyHandler());
         server.setExecutor(null); // creates a default executor
@@ -51,7 +50,7 @@ public class ImaggaClassifier {
                 for (Map.Entry<String, List<String>> e : eh.entrySet()) {
                     rh.put(e.getKey(), e.getValue().get(0));
                 }
-                fakeInsta(Float.parseFloat((String)rh.get("Latitude")), Float.parseFloat((String)rh.get("Longitude")));
+                fakeInsta(Float.parseFloat((String) rh.get("Latitude")), Float.parseFloat((String) rh.get("Longitude")));
             } catch (Exception e) {
                 System.out.println("ERROR: " + e);
                 e.printStackTrace();
@@ -59,17 +58,29 @@ public class ImaggaClassifier {
         }
     }
 
-    static void fakeInsta(Float lat, Float lon) {
-        ArrayList instaUrls = new ArrayList();
-        ArrayList classfierJSONs = new ArrayList();
-        instaUrls.add("https://www.royalcanin.com/~/media/Royal-Canin/Product-Categories/cat-adult-landing-hero.ashx");
-        instaUrls.add("https://images-na.ssl-images-amazon.com/images/G/01/img15/pet-products/small-tiles/23695_pets_vertical_store_dogs_small_tile_8._CB312176604_.jpg");
-        HashMap myMap = instaClassify(instaUrls);
+    static void fakeInsta(Float lat, Float lon) throws InterruptedException {
+        ArrayList twitList = new ArrayList();
+        // The factory instance is re-useable and thread safe.
+        Twitter twitter = TwitterFactory.getSingleton();
+        String qryStr = String.format("geocode:%f,%f,1km filter:twimg", lat, lon);
+        //"geocode:-22.912214,-43.230182,1km filter:twimg"
+        Query query = new Query(qryStr);
+        QueryResult result = null;
+        try {
+            result = twitter.search(query);
+        } catch (TwitterException e) {
+            e.printStackTrace();
+        }
+        for (Status status : result.getTweets()) {
+            System.out.println("" + status.getMediaEntities()[0].getMediaURL());
+            twitList.add(status.getMediaEntities()[0].getMediaURL());
+        }
+        HashMap myMap = instaClassify(twitList);
         System.out.println(new PrettyPrintingMap<String, String>(myMap));
         hashToTextToImg(myMap); // save wordFreqs.txt
     }
 
-    static HashMap instaClassify(ArrayList instaUrls) {
+    static HashMap instaClassify(ArrayList instaUrls) throws InterruptedException {
         ArrayList classfierJSONs = new ArrayList();
         String apiKey = "acc_db2e8c1135859a7", apiSecret = "0edb16800ccf9aaf1f6c14c35993eb70";
         HashMap classMap = new HashMap();
@@ -86,6 +97,7 @@ public class ImaggaClassifier {
                 JSONObject obj1 = (JSONObject) ary.get(0); //hackey hack hackathon
                 JSONArray ary2 = (JSONArray) obj1.get("tags");
                 classfierJSONs.add(ary2);
+                Thread.sleep(900);
             }
             classMap = jsonsToMap(classfierJSONs);
         } catch (UnirestException e) {
@@ -137,7 +149,22 @@ public class ImaggaClassifier {
             }
         }
         writer.close();
-//        CloudRenderer warandpeace = new CloudRenderer("warandpeace.txt", SourceType.FILE, DrawingPattern.GAUSSIAN, "tolstoy");
-//        warandpeace.draw();
+
+        final FrequencyAnalyzer frequencyAnalyzer = new FrequencyAnalyzer();
+        File file = new File("wordFreqs.txt");
+        try {
+            FileInputStream fis = new FileInputStream(file);
+            final List<WordFrequency> wordFrequencies = frequencyAnalyzer.load(fis);
+            final Dimension dimension = new Dimension(600, 600);
+            final WordCloud wordCloud = new WordCloud(dimension, CollisionMode.PIXEL_PERFECT);
+//            wordCloud.setPadding(2);
+//            wordCloud.setBackground(new CircleBackground(300));
+//            wordCloud.setColorPalette(new ColorPalette(new Color(0x4055F1), new Color(0x408DF1), new Color(0x40AAF1), new Color(0x40C5F1), new Color(0x40D3F1), new Color(0xFFFFFF)));
+//            wordCloud.setFontScalar(new SqrtFontScalar(10, 40));
+            wordCloud.build(wordFrequencies);
+            wordCloud.writeToFile("wordFreq.png");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

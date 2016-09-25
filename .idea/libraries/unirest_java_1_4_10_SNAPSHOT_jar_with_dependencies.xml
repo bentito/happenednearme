@@ -5,8 +5,11 @@
       <root url="jar://$PROJECT_DIR$/libs/jackson-core-2.8.1.jar!/" />
       <root url="jar://$PROJECT_DIR$/libs/jackson-databind-2.8.3.jar!/" />
       <root url="jar://$PROJECT_DIR$/libs/twitter4j-core-4.0.4.jar!/" />
+      <root url="jar://$PROJECT_DIR$/libs/kumo-1.7.jar!/" />
     </CLASSES>
     <JAVADOC />
-    <SOURCES />
+    <SOURCES>
+      <root url="jar://$PROJECT_DIR$/libs/kumo-1.7.jar!/" />
+    </SOURCES>
   </library>
 </component>

@@ -6,6 +6,9 @@
       <element id="extracted-dir" path="$PROJECT_DIR$/../unirest-java/target/unirest-java-1.4.10-SNAPSHOT-jar-with-dependencies.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$PROJECT_DIR$/libs/jackson-core-2.8.1.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$PROJECT_DIR$/libs/jackson-databind-2.8.3.jar" path-in-jar="/" />
+      <element id="library" level="project" name="unirest-java-1.4.10-SNAPSHOT-jar-with-dependencies" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/libs/twitter4j-core-4.0.4.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/libs/kumo-1.7.jar" path-in-jar="/" />
     </root>
   </artifact>
 </component>
